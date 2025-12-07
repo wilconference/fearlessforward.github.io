@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fearless Forward - Table Check</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- RESET BOX MODEL (PENTING AGAR RAPI) --- */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* --- BACKGROUND --- */
+        body {
+            font-family: 'Lato', sans-serif;
+            /* Pastikan nama file gambar benar */
+            background: url('background.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #4a4a4a;
+        }
+
+        /* --- CONTAINER KACA (FROSTED) --- */
+        .container {
+            background-color: rgba(255, 255, 255, 0);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(194, 24, 91, 0.15); 
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            color: #C2185B;
+            margin: 0 0 5px 0;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            color: #880E4F;
+            font-style: italic;
+            margin-bottom: 35px;
+            font-size: 1.1em;
+        }
+
+        /* --- CLASS UTAMA UNTUK LABEL (STEP 1 & 2) --- */
+        /* Kita pakai satu class untuk menjamin ukuran/posisi sama persis */
+        .step-label {
+            display: block;
+            font-family: 'Lato', sans-serif;
+            font-weight: 700;        /* Tebal */
+            color: #C2185B;          /* Pink */
+            font-size: 0.95em;       /* Ukuran pas */
+            text-transform: uppercase; /* Kapital */
+            letter-spacing: 1px;
+            margin-bottom: 8px;      /* Jarak ke input */
+            margin-top: 5px;
+            text-align: left;
+            
+            /* KUNCI KESEJAJARAN OPTIKAL */
+            /* Kita beri margin kiri sedikit agar lurus dengan lengkungan input */
+            margin-left: 4px; 
+        }
+
+        /* --- CLASS ALTERNATIF UNTUK TEXT INSTRUKSI (ABU-ABU) --- */
+        .instruction-mode {
+            text-align: center !important;
+            color: #888 !important;
+            font-style: italic !important;
+            font-weight: 400 !important;
+            text-transform: none !important;
+            margin-left: 0 !important; /* Reset margin kalau sedang mode instruksi */
+            letter-spacing: 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        /* --- INPUT HOTEL --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 25px; /* Jarak antar step */
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px; /* Padding dalam input */
+            background-color: rgba(255, 255, 255, 0.95); 
+            border: 2px solid #F8BBD0;
+            border-radius: 12px;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s;
+            color: #333;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .search-input:focus {
+            border-color: #C2185B;
+            background-color: #FFF;
+            box-shadow: 0 0 0 4px rgba(194, 24, 91, 0.1);
+        }
+
+        /* --- DROPDOWN LIST --- */
+        .dropdown-list {
+            position: absolute;
+            top: 110%; /* Sedikit jarak dari input */
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #F48FB1;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: none; 
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #fefefe;
+            font-size: 0.95em;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover { 
+            background-color: #FCE4EC;
+            color: #C2185B;
+        }
+
+        /* --- DAFTAR NAMA (CARD) --- */
+        .name-card {
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.8); 
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .name-card:hover {
+            transform: translateY(-2px);
+            border-color: #F48FB1;
+            background-color: #FFF;
+            box-shadow: 0 4px 10px rgba(194, 24, 91, 0.1);
+        }
+
+        .name-card.selected {
+            border: 2px solid #C2185B;
+            background-color: #FCE4EC;
+        }
+        
+        .name-card.selected::after {
+            content: '✔';
+            color: #C2185B;
+            font-weight: bold;
+        }
+
+        /* --- BUTTON --- */
+        .btn-check {
+            margin-top: 15px;
+            padding: 16px;
+            background: linear-gradient(135deg, #ec407a 0%, #C2185B 100%);
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(194, 24, 91, 0.3);
+            transition: transform 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .btn-check:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(194, 24, 91, 0.4);
+        }
+
+        /* --- RESULT --- */
+        #tableResultContainer {
+            margin-top: 30px;
+            padding: 20px;
+            text-align: center;
+            border-top: 2px dashed rgba(194, 24, 91, 0.2);
+            display: none; /* Sembunyi default */
+            animation: fadeIn 0.5s;
+        }
+
+        .table-label {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            color: #880E4F;
+            margin-bottom: 5px;
+        }
+
+        .table-badge {
+            font-size: 5em;
+            font-weight: 700;
+            color: #C2185B;
+            font-family: 'Playfair Display', serif;
+            line-height: 1;
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.6);
+        }
+
+        /* Helper Utility */
+        .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FEARLESS FORWARD</h2>
+    <div class="subtitle">Empowering LeadHERship - Table Check</div>
+
+    <div class="step-label">1. SELECT YOUR HOTEL</div>
+    
+    <div class="input-group">
+        <input 
+            type="text" 
+            id="hotelInput" 
+            class="search-input" 
+            placeholder="Type hotel name..." 
+            autocomplete="off"
+            onkeyup="filterHotel()"
+            onclick="showAllHotels()"
+        >
+        <div id="hotelList" class="dropdown-list"></div>
+    </div>
+
+    <div id="labelStep2" class="step-label instruction-mode">
+        (Please select your hotel first)
+    </div>
+
+    <div id="nameListContainer"></div>
+
+    <div id="actionContainer" class="hidden">
+        <button class="btn-check" onclick="revealTable()">CHECK TABLE NUMBER</button>
+    </div>
+
+    <div id="tableResultContainer"></div>
+</div>
+
+<script>
+    // --- DATA TAMU ---
+    const dataTamu = [
+        { table: "01", nama: "Lely Setiawati", hotel: "Aloft Wahid Hasyim Jakarta" },
+{ table: "01", nama: "Dewi Masyogi", hotel: "Cicada Resort Bali Ubud, Autograph Collection" },
+{ table: "01", nama: "Diah Candra Wati", hotel: "Courtyard by Marriott Bali Nusa Dua Resort" },
+{ table: "01", nama: "Evy Nuryathi", hotel: "Element by Westin Bali Ubud" },
+{ table: "01", nama: "Nurdina", hotel: "Four Points by Sheraton Bintan, Lagoi Bay" },
+{ table: "01", nama: "Fedra Valencia", hotel: "Le Méridien Jakarta" },
+{ table: "01", nama: "Apriliyantie  Islami", hotel: "Moxy Bandung" },
+{ table: "01", nama: "Ni Kadek Ari Wulandari", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "01", nama: "Febi Setianingrum", hotel: "The Westin Jakarta" },
+{ table: "01", nama: "Cokorda Istri Dewi Jayanti", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "02", nama: "Pipit Widayanti", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "02", nama: "Sari Afriliyantini Aminuddin", hotel: "Fairfield by Marriott Bekasi" },
+{ table: "02", nama: "Dewi Padmasari", hotel: "Four Points by Sheraton Bali Ungasan" },
+{ table: "02", nama: "Grace Titaheluw", hotel: "Four Points by Sheraton Makassar" },
+{ table: "02", nama: "Andhika Nurcahrini", hotel: "Moxy Solo" },
+{ table: "02", nama: "Faruzia Gusfina", hotel: "Natra Bintan, a Tribute Portfolio Resort" },
+{ table: "02", nama: "Ni Wayan Sariati", hotel: "St. Regis Bali Resort" },
+{ table: "02", nama: "Vinny Tan", hotel: "The Ritz-Carlton Jakarta, Pacific Place" },
+{ table: "02", nama: "Vania Pradina", hotel: "The Westin Resort & Spa, Ubud Bali" },
+{ table: "02", nama: "Kadek Henny Selviyanti", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "03", nama: "Ririe Idriana", hotel: "Aloft Wahid Hasyim Jakarta" },
+{ table: "03", nama: "Ratih Monika Putri", hotel: "Batam Marriott Hotel Harbour Bay" },
+{ table: "03", nama: "Sinta Septiana", hotel: "Cicada Resort Bali Ubud, Autograph Collection" },
+{ table: "03", nama: "Fitri Wulandani", hotel: "Courtyard by Marriott Bali Nusa Dua Resort" },
+{ table: "03", nama: "Kartika Ashari", hotel: "Four Points by Sheraton Makassar" },
+{ table: "03", nama: "Putu Sri Pratnawati", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "03", nama: "Jasmine Haj Ashya", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "03", nama: "Danisha Stefany", hotel: "RMAS Indonesia" },
+{ table: "03", nama: "Retno Tresnaningtyas", hotel: "The Westin Jakarta" },
+{ table: "03", nama: "Debby Marpaung", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "04", nama: "Ni Luh Putu Rais Janasih", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "04", nama: "I Gusti Agung Diah Antari", hotel: "Element by Westin Bali Ubud" },
+{ table: "04", nama: "Rakhmah Halimatur", hotel: "Four Points by Sheraton Bali Ungasan" },
+{ table: "04", nama: "Ni Luh Purwiasih", hotel: "Mandapa, A Ritz-Carlton Reserve" },
+{ table: "04", nama: "Zahara Tiara Kurnia", hotel: "Natra Bintan, a Tribute Portfolio Resort" },
+{ table: "04", nama: "Sintya Damayanthi", hotel: "Renaissance Bali Nusa Dua Resort" },
+{ table: "04", nama: "Novy Astuti", hotel: "RMAS Indonesia" },
+{ table: "04", nama: "Natasha Dehnhardt", hotel: "St. Regis Jakarta" },
+{ table: "04", nama: "Dwi Zakiyah Rizki", hotel: "The Westin Jakarta" },
+{ table: "04", nama: "Alia Alia", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "05", nama: "Ni Komang Intan Trisna Wulandari", hotel: "Courtyard by Marriott Bali Nusa Dua Resort" },
+{ table: "05", nama: "Rizma Putri", hotel: "Fairfield by Marriott Bali Kuta Sunset Road" },
+{ table: "05", nama: "Sharell Tulende", hotel: "Four Points by Sheraton Manado" },
+{ table: "05", nama: "Eva Wahyuni", hotel: "Sheraton Bali Kuta Resort" },
+{ table: "05", nama: "Ferina Manalu", hotel: "Sheraton Senggigi Beach Resort Lombok" },
+{ table: "05", nama: "Desak Putu Dian Puspita Sari", hotel: "The Laguna a Luxury Collection Resort & Spa Nusa Dua Bali" },
+{ table: "05", nama: "Dianida  Astuti", hotel: "The Ritz-Carlton Jakarta, Pacific Place" },
+{ table: "05", nama: "Dewa Ayu Sri Yudiartini", hotel: "The Sira a Luxury Collection Resort and Spa, Lombok" },
+{ table: "05", nama: "Novita Apriliani", hotel: "The Westin Jakarta" },
+{ table: "05", nama: "Yemima Youriza", hotel: "The Westin Resort & Spa, Ubud Bali" },
+{ table: "06", nama: "Lisa Herdiana", hotel: "Aloft Bali Seminyak" },
+{ table: "06", nama: "Eka Novianti", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "06", nama: "Ni Putu Jessica Apriliyani Suartana", hotel: "Four Points by Sheraton Bali, Kuta" },
+{ table: "06", nama: "Lailatul Bella  Carina", hotel: "JW Marriott Hotel Surabaya" },
+{ table: "06", nama: "Ita  Manda", hotel: "RMAS Indonesia" },
+{ table: "06", nama: "Rd Erlian Apriliana", hotel: "Sheraton Jakarta Soekarno Hatta Airport" },
+{ table: "06", nama: "Anne Wahyuni", hotel: "The Westin Jakarta" },
+{ table: "06", nama: "Dewi Sukmawati", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "06", nama: "Ni Putu Widhya Santhi  Puteri", hotel: "W Bali Seminyak" },
+{ table: "06", nama: "Oggye Charisma Ayshah Putri", hotel: "Yogyakarta Marriott Hotel" },
+{ table: "07", nama: "Tulip Verbenantha", hotel: "Aloft Bali Seminyak" },
+{ table: "07", nama: "Istanty  Nurainy", hotel: "JW Marriott Hotel Surabaya" },
+{ table: "07", nama: "Sri Dwipayanti", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "07", nama: "Ninda Wulandira", hotel: "RMAS Indonesia" },
+{ table: "07", nama: "Nining Hariati", hotel: "Sheraton Senggigi Beach Resort Lombok" },
+{ table: "07", nama: "Devina  Aristyani", hotel: "St. Regis Jakarta" },
+{ table: "07", nama: "Dina Anggraeni", hotel: "TA'AKTANA, a Luxury Collection Resort & Spa, Labuan Bajo" },
+{ table: "07", nama: "Alicia Suwandi", hotel: "The Westin Jakarta" },
+{ table: "07", nama: "Novi Herawati", hotel: "The Westin Resort & Spa, Ubud Bali" },
+{ table: "07", nama: "Margareta Fariadi", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "08", nama: "Ayu Rusita Kurniawati Dewi", hotel: "Amarterra Villas Resort Bali Nusa Dua, Autograph Collection" },
+{ table: "08", nama: "Ni Komang Aristawati", hotel: "BVLGARI Resort Bali" },
+{ table: "08", nama: "Widyadhara  Maharddhika", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "08", nama: "Andriani Andriani", hotel: "Renaissance Bali Nusa Dua Resort" },
+{ table: "08", nama: "Herling Herling", hotel: "St. Regis Bali Resort" },
+{ table: "08", nama: "Yoshefin  Devy Saraswati", hotel: "The Hermitage, a Tribute Portfolio Hotel Jakarta" },
+{ table: "08", nama: "Anak Agung Intan  Rosa", hotel: "The Laguna a Luxury Collection Resort & Spa Nusa Dua Bali" },
+{ table: "08", nama: "Natasha Wilson", hotel: "The Westin Nirup Island Resort & Spa Batam" },
+{ table: "08", nama: "Komang Ayu  Purnamawati", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "08", nama: "Ni Luh Yulyarti  Wahyuningsih", hotel: "W Bali Seminyak" },
+{ table: "09", nama: "Dinda Ayu Pratiwi", hotel: "Amarterra Villas Resort Bali Nusa Dua, Autograph Collection" },
+{ table: "09", nama: "Ni Putu Sinthya Anjani", hotel: "Courtyard by Marriott Bali Nusa Dua Resort" },
+{ table: "09", nama: "Tarra Ningsih", hotel: "Fairfield by Marriott Bali Legian" },
+{ table: "09", nama: "Wulan Septiandari", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "09", nama: "Shinta Widhiasari", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "09", nama: "Ni Putu Junita Laberio", hotel: "RMAS Indonesia" },
+{ table: "09", nama: "Ida Ayu Made Dwi Virgoyani Pramesthy", hotel: "Sheraton Bali Kuta Resort" },
+{ table: "09", nama: "Suwita Rahayu", hotel: "St. Regis Bali Resort" },
+{ table: "09", nama: "Ni Ketut Septa  Ariani", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "09", nama: "Maylina Theresia BR  Hutabarat", hotel: "Yogyakarta Marriott Hotel" },
+{ table: "10", nama: "Elsha Riani Panggabean", hotel: "BVLGARI Resort Bali" },
+{ table: "10", nama: "Ni Kadek Arini", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "10", nama: "Margaretha Situmorang", hotel: "Four Points by Sheraton Surabaya, Pakuwon Indah" },
+{ table: "10", nama: "Ni Luh Putu Desy Setiawati", hotel: "Mandapa, a Ritz-Carlton Reserve" },
+{ table: "10", nama: "Ni Kadek  Sika Agusalinantari", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "10", nama: "Suryantini  Kadek", hotel: "St. Regis Bali Resort" },
+{ table: "10", nama: "Desi Ariani", hotel: "Sthala, a Tribute Portfolio Hotel Ubud Bali" },
+{ table: "10", nama: "Ni Luh Sri Diantini", hotel: "TA'AKTANA, a Luxury Collection Resort & Spa, Labuan Bajo" },
+{ table: "10", nama: "Ni Nyoman Alit Astriyani", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "10", nama: "Desri Radmawati", hotel: "W Bali Seminyak" },
+{ table: "11", nama: "Ni Nyoman Septiari", hotel: "BVLGARI Resort Bali" },
+{ table: "11", nama: "Hany Maharisa", hotel: "JW Marriott Hotel Jakarta" },
+{ table: "11", nama: "Ni Made Dwi Bella Yanthi", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "11", nama: "Ni Kadek Widiasih", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "11", nama: "Salsabila  Nurfathriyah", hotel: "Sheraton Belitung Resort" },
+{ table: "11", nama: "Yus Kristina", hotel: "Sheraton Hotel Surabaya" },
+{ table: "11", nama: "Gusti Agung Pramesti Ayu  Kinanti", hotel: "The Laguna a Luxury Collection Resort & Spa Nusa Dua Bali" },
+{ table: "11", nama: "Ria Mranggi", hotel: "The Ritz-Carlton, Bali" },
+{ table: "11", nama: "Dewi Anggraini", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "11", nama: "Endang Hariningsih", hotel: "The Westin Surabaya" },
+{ table: "12", nama: "Fitriyan Ramadhani", hotel: "Aloft Surabaya Pakuwon City" },
+{ table: "12", nama: "Ni Komang Sri Darmayanti", hotel: "Amarterra Villas Resort Bali Nusa Dua, Autograph Collection" },
+{ table: "12", nama: "Ni Komang A. Triani Pridayanti", hotel: "Courtyard by Marriott Bali Seminyak Resort" },
+{ table: "12", nama: "Alice Tedjakastama", hotel: "JW Marriott Hotel Jakarta" },
+{ table: "12", nama: "Halida Lailie", hotel: "Le Méridien Jakarta" },
+{ table: "12", nama: "Ni Komang Trianti", hotel: "Mandapa, a Ritz-Carlton Reserve" },
+{ table: "12", nama: "Luh Yeni Sudiani", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "12", nama: "Anak Agung Diah Anggreni", hotel: "Sthala, a Tribute Portfolio Hotel Ubud Bali" },
+{ table: "12", nama: "Tiffany Januardi", hotel: "The Ritz-Carlton Jakarta, Mega Kuningan" },
+{ table: "12", nama: "Debrina  Siti Anzarni", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "13", nama: "Ni Wayan Soviari", hotel: "Four Points by Sheraton Bali, Kuta" },
+{ table: "13", nama: "Maisye Hutagaol", hotel: "Four Points by Sheraton Balikpapan" },
+{ table: "13", nama: "Istiqomah Istiqomah", hotel: "JW Marriott Hotel surabaya" },
+{ table: "13", nama: "Ni Wayan Dewi Suastini", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "13", nama: "Ni Putu Evi Kusumayanti", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "13", nama: "Niputu Ana susanti", hotel: "Sheraton bali kuta resort" },
+{ table: "13", nama: "Dwi Indrawati", hotel: "TA'AKTANA, a Luxury Collection Resort & Spa, Labuan Bajo" },
+{ table: "13", nama: "Amelia  Atika", hotel: "The Mayflower, Jakarta - Marriott Executive Apartments" },
+{ table: "13", nama: "Siti Juariah", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "13", nama: "I Gusti Ayu Alit Dwi  Laksani S.", hotel: "W Bali Seminyak" },
+{ table: "14", nama: "Aliza Fakhirah", hotel: "Four Points by Sheraton Bandung" },
+{ table: "14", nama: "Tia Ayu Lestari", hotel: "Four Points Thamrin, Four Points Batam, Fairfield by Marriott Soekarno-Hatta, Fairfield by Marriott Surabaya, Moxy Solo" },
+{ table: "14", nama: "Intan Dhirayanti", hotel: "Hiliwatu, Bali Ubud, a Tribute Portfolio Resort" },
+{ table: "14", nama: "Kiki Fatul  Fatmala Amir", hotel: "JW Marriott Hotel Surabaya" },
+{ table: "14", nama: "Ni Wayan kerti", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "14", nama: "Nurul Isrofiah", hotel: "Le Méridien Jakarta" },
+{ table: "14", nama: "Cindy Carolina", hotel: "Sheraton Surabaya Hotel & Towers, Four Points by Sheraton Surabaya Tunjungan Plaza, Aloft Surabaya Pakuwon City" },
+{ table: "14", nama: "Ni Made Sri Astini", hotel: "The Laguna a Luxury Collection Resort & Spa Nusa Dua Bali" },
+{ table: "14", nama: "Alin Nika Ayu Ningsih", hotel: "The Ritz-Carlton Jakarta, Mega Kuningan" },
+{ table: "14", nama: "Kadek Indah Diarini", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "15", nama: "Putu Ana Aris Mustika Dewi", hotel: "Amarterra Villas Resort Bali Nusa Dua, Autograph Collection" },
+{ table: "15", nama: "Kadek Tasya Amelia", hotel: "Courtyard by Marriott Bali Nusa Dua Resort" },
+{ table: "15", nama: "Ayu Fitriawati", hotel: "Four Points by Sheraton Bandung" },
+{ table: "15", nama: "Michelle Sianipar", hotel: "Hiliwatu, Bali Ubud, a Tribute Portfolio Resort" },
+{ table: "15", nama: "Elita Yusma Sari", hotel: "JW Marriott Hotel Jakarta" },
+{ table: "15", nama: "Tamara Juli Budiman Hadiwijaya", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "15", nama: "Priscilla Kezia", hotel: "Sheraton Belitung Resort" },
+{ table: "15", nama: "Ayu Suandari", hotel: "The Ritz-Carlton, Bali" },
+{ table: "15", nama: "Ni Made Erlin Dayanti", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "15", nama: "Ni Made Arya Sitiari", hotel: "W Bali Seminyak" },
+{ table: "16", nama: "Novietta Devi", hotel: "Fairfield by Marriott Bali Kuta Ngurah Rai" },
+{ table: "16", nama: "Ni Made  Restianingsih", hotel: "Fairfield by Marriott South Kuta" },
+{ table: "16", nama: "Wanda Gozali", hotel: "JW Marriott Hotel Jakarta" },
+{ table: "16", nama: "Endah  Purwanti", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "16", nama: "Sri Herwanti", hotel: "Le Méridien Jakarta" },
+{ table: "16", nama: "Ni Putu Pradnyani", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "16", nama: "Cut Femmy Rahmatika", hotel: "Sheraton Bandung Hotel & Towers" },
+{ table: "16", nama: "Kartika Khrisna", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "16", nama: "Luh Putu Ayu Widyasih Karang", hotel: "W Bali Seminyak" },
+{ table: "17", nama: "Elvira  Febiani", hotel: "Area Office Jakarta, Indonesia" },
+{ table: "17", nama: "Suci Risnawati", hotel: "Four Points by Sheraton Bandung" },
+{ table: "17", nama: "Ines  Julia Antono", hotel: "Four Points by Sheraton Bintan, Lagoi Bay" },
+{ table: "17", nama: "ANI SAFITRI", hotel: "Lampung Marriott Resort and Spa" },
+{ table: "17", nama: "Evi Triayuni Bukian", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "17", nama: "Ni Ketut Rukmaningsih", hotel: "Renaissance Bali Nusa Dua Resort" },
+{ table: "17", nama: "Laura Maria Fernandez", hotel: "Renaissance Bali Uluwatu Resort & Spa" },
+{ table: "17", nama: "Luh Vony  Erliasih", hotel: "Sthala, a Tribute Portfolio Hotel Ubud Bali" },
+{ table: "17", nama: "Seniorita Manalu", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "18", nama: "Ni Ketut Pradnyadari", hotel: "Aloft Bali Kuta at Beachwalk" },
+{ table: "18", nama: "Rabella Chyntia Permata", hotel: "Four Points by Sheraton Bekasi" },
+{ table: "18", nama: "Yuniarsih Wulandari", hotel: "Four Points by Sheraton Jakarta, Thamrin" },
+{ table: "18", nama: "Ni Komang Sintya Ratna Sari Dewi", hotel: "Le Méridien Bali Jimbaran" },
+{ table: "18", nama: "Stephanie Christina", hotel: "RMAS Indonesia" },
+{ table: "18", nama: "Bazila Dayana", hotel: "Sheraton Grand Jakarta Gandaria City Hotel" },
+{ table: "18", nama: "Riswana Era  Nur Apri", hotel: "The Ritz-Carlton Jakarta, Mega Kuningan" },
+{ table: "18", nama: "Rini Hildiana", hotel: "The Westin Resort & Spa, Ubud Bali" },
+{ table: "18", nama: "ni Nyoman  Juni Artati", hotel: "The Westin Resort Nusa Dua, Bali" },
+{ table: "19", nama: "Feriana Susanti", hotel: "Fairfield by Marriott Soekarno Hatta Airport" },
+{ table: "19", nama: "Yesie Chiolina Wijaya", hotel: "Fairfield by Marriott Surabaya" },
+{ table: "19", nama: "Lusy Joroh", hotel: "Lampung Marriott Resort and Spa" },
+{ table: "19", nama: "Putu Sintya Dewi Winarta", hotel: "Mandapa, a Ritz-Carlton Reserve" },
+{ table: "19", nama: "Dewi Yulfa", hotel: "Renaissance Bali Nusa Dua Resort" },
+{ table: "19", nama: "Fitri Maysaroh", hotel: "Sheraton Grand Jakarta Gandaria City Hotel" },
+{ table: "19", nama: "Armetha Etania", hotel: "The Hermitage, a Tribute Portfolio Hotel Jakarta" },
+{ table: "19", nama: "Hanna Fairy Situmorang", hotel: "The Ritz-Carlton Jakarta, Mega Kuningan" },
+{ table: "19", nama: "Maretha Maretha", hotel: "The Westin Resort Nusa Dua, Bali" },
+    ];
+
+    let selectedGuestData = null;
+    const uniqueHotels = [...new Set(dataTamu.map(item => item.hotel))].sort();
+    
+    // Referensi Elemen DOM
+    const inputField = document.getElementById('hotelInput');
+    const listContainer = document.getElementById('hotelList');
+    const labelStep2 = document.getElementById('labelStep2');
+    const nameContainer = document.getElementById('nameListContainer');
+    const actionContainer = document.getElementById('actionContainer');
+    const resultContainer = document.getElementById('tableResultContainer');
+
+    // --- FUNGSI ---
+
+    function renderHotelList(filterText = '') {
+        listContainer.innerHTML = '';
+        const filtered = uniqueHotels.filter(hotel => 
+            hotel.toLowerCase().includes(filterText.toLowerCase())
+        );
+        
+        if (filtered.length > 0) {
+            filtered.forEach(hotel => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = hotel;
+                item.onclick = function() { selectHotel(hotel); };
+                listContainer.appendChild(item);
+            });
+            listContainer.style.display = 'block';
+        } else {
+            listContainer.style.display = 'none';
+        }
+    }
+
+    function filterHotel() { renderHotelList(inputField.value); }
+    function showAllHotels() { renderHotelList(inputField.value === '' ? '' : inputField.value); }
+
+    function selectHotel(hotelName) {
+        inputField.value = hotelName;
+        listContainer.style.display = 'none';
+        
+        // Reset state
+        selectedGuestData = null;
+        actionContainer.classList.add('hidden');
+        resultContainer.style.display = 'none';
+        
+        // --- LOGIKA UBAH LABEL MENJADI IDENTIK DENGAN STEP 1 ---
+        // 1. Hapus class 'instruction-mode' (yang bikin abu-abu/miring)
+        labelStep2.classList.remove('instruction-mode');
+        
+        // 2. Ubah teks menjadi huruf kapital dan tegas
+        labelStep2.textContent = "2. SELECT YOUR NAME BELOW:";
+        // -------------------------------------------------------
+
+        displayGuestNames(hotelName);
+    }
+
+    function displayGuestNames(hotelName) {
+        nameContainer.innerHTML = '';
+        const tamuList = dataTamu.filter(t => t.hotel === hotelName);
+
+        if (tamuList.length === 0) {
+            nameContainer.innerHTML = '<div style="text-align:center; color:#666; font-style:italic; margin-top:10px;">No guests found.</div>';
+            return;
+        }
+
+        tamuList.forEach(tamu => {
+            const card = document.createElement('div');
+            card.className = 'name-card';
+            card.innerHTML = `<span>${tamu.nama}</span>`;
+            card.onclick = function() { selectGuest(card, tamu); };
+            nameContainer.appendChild(card);
+        });
+    }
+
+    function selectGuest(element, tamuData) {
+        const allCards = document.querySelectorAll('.name-card');
+        allCards.forEach(c => c.classList.remove('selected'));
+
+        element.classList.add('selected');
+        selectedGuestData = tamuData;
+
+        resultContainer.style.display = 'none';
+        actionContainer.classList.remove('hidden');
+        
+        // Scroll halus ke tombol
+        actionContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function revealTable() {
+        if (!selectedGuestData) return;
+
+        resultContainer.style.display = 'block';
+        resultContainer.innerHTML = `
+            <div class="table-label">Table Number for<br><strong>${selectedGuestData.nama}</strong></div>
+            <div class="table-badge">${selectedGuestData.table}</div>
+        `;
+        resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Tutup dropdown kalau klik di luar
+    document.addEventListener('click', function(e) {
+        if (!inputField.contains(e.target) && !listContainer.contains(e.target)) {
+            listContainer.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
